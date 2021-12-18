@@ -1,33 +1,27 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { ImSearch } from 'react-icons/im';
-import { toast } from 'react-toastify';
+import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import s from './Searchbar.module.css';
 
 class SearchBar extends Component {
-  static propTypes = {
-    onSubmit: PropTypes.func.isRequired,
-  };
-
   state = {
     searchQuery: '',
   };
 
-  handleChange = event => {
-    const { name, value } = event.currentTarget;
-    this.setState({ [name]: value });
+  handleChange = e => {
+    this.setState({ searchQuery: e.currentTarget.value.toLowerCase() });
   };
 
-  handleSubmit = event => {
-    event.preventDefault();
+  handleSubmit = e => {
+    e.preventDefault();
     if (this.state.searchQuery.trim() === '') {
-      toast.error('Enter your query!');
+      toast('Enter your query!');
       return;
     }
 
-    const { searchQuery } = this.state;
-    this.props.onSubmit(searchQuery);
+    this.props.onSubmit(this.state.searchQuery);
     this.setState({ searchQuery: '' });
   };
 
@@ -39,6 +33,7 @@ class SearchBar extends Component {
           <button type="submit" className={s.SearchFormButton}>
             <ImSearch />
           </button>
+          <ToastContainer autoClose={2000} />
           <input
             className={s.SearchFormInput}
             type="text"
@@ -54,5 +49,9 @@ class SearchBar extends Component {
     );
   }
 }
+
+SearchBar.propTypes = {
+  onSubmit: PropTypes.func.isRequired,
+};
 
 export default SearchBar;

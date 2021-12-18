@@ -3,11 +3,6 @@ import PropTypes from 'prop-types';
 import s from './Modal.module.css';
 
 class Modal extends Component {
-  static propTypes = {
-    onBackdrop: PropTypes.func.isRequired,
-    content: PropTypes.string.isRequired,
-  };
-
   componentDidMount() {
     window.addEventListener('keydown', this.handleKeyDown);
   }
@@ -29,16 +24,22 @@ class Modal extends Component {
   };
 
   render() {
-    const { content } = this.props;
+    const { content, tags } = this.props;
     console.log(content);
     return (
       <div className={s.Overlay} onClick={this.handleBackdropClick}>
         <div className={s.Modal}>
-          <img src={content} alt="" />
+          <img src={content} alt={tags} />
         </div>
       </div>
     );
   }
 }
+
+Modal.propTypes = {
+  onBackdrop: PropTypes.func.isRequired,
+  content: PropTypes.string.isRequired,
+  tags: PropTypes.string,
+};
 
 export default Modal;

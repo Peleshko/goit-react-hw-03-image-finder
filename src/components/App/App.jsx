@@ -1,12 +1,11 @@
 import React, { Component } from 'react';
-import { ToastContainer } from 'react-toastify';
-import SearchBar from '../Searchbar/Searchbar';
-import ImageGallery from '../ImageGallery/ImageGallery';
-import Modal from '../Modal/Modal';
-import Button from '../Button/Button';
-import Loader from '../Loader/Loader';
-import fetchImages from '../API/api';
-import './App.css';
+import SearchBar from '../Searchbar';
+import ImageGallery from '../ImageGallery';
+import Modal from '../Modal';
+import Button from '../Button';
+import Loader from '../Loader';
+import fetchImages from '../../services/api';
+import s from './App.module.css';
 
 class App extends Component {
   state = {
@@ -62,17 +61,20 @@ class App extends Component {
     this.setState({ modalContent: element.largeImageURL });
   };
 
-  getData = () => {
+  getData = async () => {
     const { searchQuery, page } = this.state;
     this.toggleLoading();
-    fetchImages(searchQuery, page)
-      .then(({ hits }) => {
-        this.setState(({ visibleImages }) => {
-          return { visibleImages: [...visibleImages, ...hits] };
-        });
-      })
-      .catch(error => console.log(error.message))
-      .finally(this.toggleLoading);
+
+    try {
+      const data = await fetchImages(searchQuery, page);
+      this.setState(({ visibleImages }) => {
+        return { visibleImages: [...visibleImages, ...data.hits] };
+      });
+    } catch (e) {
+      console.error(e);
+    } finally {
+      this.toggleLoading();
+    }
   };
 
   render() {
@@ -81,29 +83,24 @@ class App extends Component {
     const isNotLastPage = visibleImages.length / page === 12;
     const btnEnable = visibleImages.length > 0 && !isLoading && isNotLastPage;
     return (
-      <div className="App">
+      <div className={s.App}>
         <SearchBar onSubmit={this.handleChangeQuery} />
-        {visibleImages.length === 0 ? (
-          <h2>Enter your request</h2>
-        ) : (
-          <>
-            <ImageGallery
-              images={visibleImages}
-              onClick={this.toggleModal}
-              onItemClick={this.modalContentSet}
-            />
-            <ToastContainer autoClose={3000} />
+        <>
+          <ImageGallery
+            images={visibleImages}
+            onClick={this.toggleModal}
+            onItemClick={this.modalContentSet}
+          />
 
-            {openModal && (
-              <Modal content={modalContent} onBackdrop={this.toggleModal} />
-            )}
-            {isLoading && <Loader />}
+          {openModal && (
+            <Modal content={modalContent} onBackdrop={this.toggleModal} />
+          )}
+          {isLoading && <Loader />}
 
-            {btnEnable && (
-              <Button name="Load more" onPress={this.handleNextPage} />
-            )}
-          </>
-        )}
+          {btnEnable && (
+            <Button name="Load more" onPress={this.handleNextPage} />
+          )}
+        </>
       </div>
     );
   }
